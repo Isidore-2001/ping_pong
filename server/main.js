@@ -1,5 +1,4 @@
 import http from 'http';
-var PORT = process.env.PORT || 8080
 import RequestController from './controllers/requestController.js';
 import { Server as IOServer } from 'socket.io';
 import IOController from './controllers/ioController.js';
@@ -11,4 +10,4 @@ const io = new IOServer(server);
 const ioController = new IOController(io);
 
 io.on('connection', ioController.registerSocket.bind(ioController));
-server.listen(PORT);
+server.listen(8080);
