@@ -1,2 +1,1 @@
-worker: cd server 
-web: node main.js
+web: cd server && node main.js
