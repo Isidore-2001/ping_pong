@@ -6,6 +6,7 @@ export default class Paddle extends Mobile {
     constructor(x, y) {
         super(x, y, PaddleImgSrc, 0, 0);
         this._moving = MoveState.NONE;
+
     }
 
     /**
@@ -51,12 +52,12 @@ export default class Paddle extends Mobile {
     }
 
     moveRight() {
-        this.shiftX = +10;
+        this.shiftX = +2;
         this._moving = MoveState.RIGHT;
     }
 
     moveLeft() {
-        this.shiftX = -10;
+        this.shiftX = -2;
         this._moving = MoveState.LEFT;
     }
 

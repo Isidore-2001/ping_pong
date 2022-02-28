@@ -15,7 +15,10 @@ export default class Game {
     #paddle2;
     #player;
     #socket;
+    #pause; 
     constructor(canvas) {
+        this.#pause = false; 
+        this.pauseImage = this.createImage(pauseImgPath);
         this.raf = null;
         this.canvas = canvas;
         this.ctxt = this.canvas.getContext("2d");
@@ -32,13 +35,15 @@ export default class Game {
             score : 0
 
         }
-        this.pauseImage = this.createImage(pauseImgPath);
+        /*Les méthodes de gestion de connexion de socket */
         this.receiveKey();
+        this.initData();
+        this.refusedConnect();
     }
-   /**
-    * Cette méthode permet de créer une image 
-    * correspondant à la source imagePath
-    */
+    /**
+     * Cette méthode permet de créer une image 
+     * correspondant à la source imagePath
+     */
     createImage(imagePath) {
         const menuImg = new Image();
         menuImg.width = 650;
@@ -64,8 +69,25 @@ export default class Game {
     get paddle2(){
         return this.#paddle2;
     }
+
+    /**
+     *Cette méthode permet d'accéder à l'attribut privé 
+     de socket 
+     *
+     */ 
     get socket() {
         return this.#socket;
+    }
+
+    /**
+     * getter de pause 
+     */
+    get pause() {
+        return this.#pause;
+    }
+
+    set pause(isPause){
+        this.#pause = isPause;
     }
     /** start this game animation */
     start() {
@@ -74,8 +96,9 @@ export default class Game {
     /** stop this game animation */
     stop() {
         window.cancelAnimationFrame(this.raf);
-        this.ctxt.drawImage(this.pauseImage, 50, 50);
-
+        if (this.pause){
+            this.ctxt.drawImage(this.pauseImage, 50, 50);
+        }
     }
     keyDownActionHandler(event) {
         switch (event.key) {
@@ -112,6 +135,52 @@ export default class Game {
         }
         return this.paddle2;
     }
+    /**
+     * Cette méthode permet de gérer l'accès 
+     * à un room ou pas  
+     * Celui-ci permet de déleguer le premier joueur et 
+     * le second joueur 
+     */ 
+    initData () {
+        this.socket.on('join room', (data, owner, dataPlayer) => {
+            this.player.roomId = data;
+            if (owner && dataPlayer.socketId === this.socket.id){
+                this.player.paddle = this.paddle;
+                this.player.host = true;
+                document.getElementById('typeplayer').innerHTML = "Vous êtes le premier joueur";
+            }else{
+                this.player.paddle = this.paddle;
+                this.player.host = false;
+                this.player.socketId = this.socket.id;
+                document.getElementById('typeplayer').innerHTML = "Vous êtes le second joueur";
+            }
+            dataPlayer = this.player;
+            this.socket.emit('player', this.player);
+
+        }
+        )
+    }
+    /**
+     * Cette méthode permet de refuser 
+     * la connexion des autres clients et 
+     * permet de limiter le nombre de connexion à deux 
+     *
+     */ 
+    refusedConnect() {
+
+        this.socket.on('connexionRefuse', () => {
+            this.socket.emit('connexionR');
+            document.getElementById('typeplayer').classList.remove('bg-success');
+            document.getElementById('typeplayer').classList.add('bg-danger');
+            document.getElementById('typeplayer').innerHTML = "Connexion refusé";})
+
+    }
+
+    /**
+     * Cette méthode permet de 
+     * gérer les évènements Left, Up, Right, et Down  
+     *
+     */
     receiveKey(){
         let pad = this.choicePaddle();
         this.#socket.on('Ball', (ballX, ballY, shiftX, shiftY) => {
@@ -128,7 +197,6 @@ export default class Game {
         );
         this.#socket.on('Up', (p, paddle) => {
             this.paddle2.y = paddle.y
-            console.log(this.paddle2.y === paddle.y);
             this.paddle2.moveUp();
         }
         );

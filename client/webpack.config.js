@@ -6,21 +6,21 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 const res = (mode) => {
     if (mode == 'development'){
-        return 'server/public'
+        return '../server/public'
     }
     else{
-        return 'server/public'
+        return '../server/public'
     }
 }
 module.exports = {
 
-    entry: path.resolve(__dirname, 'src/scripts/pong.js'),
+    entry: path.resolve(__dirname,  'src/scripts/pong.js'),
 
     mode : 'development',  // 'production'
 
     output: {
         path: path.resolve(__dirname, ''),
-        filename: 'scripts/bundle.js'
+        filename: 'scripts/[name]-bundle.js'
     },
     devServer: {
         static: {
